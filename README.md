@@ -26,4 +26,4 @@ Here are a few random screenshots:
 
 ![](https://raw.githubusercontent.com/slightknack/random-shaders/master/images/image-01.png) | ![](https://raw.githubusercontent.com/slightknack/random-shaders/master/images/image-02.png)
 --- | ---
-![](https://raw.githubusercontent.com/slightknack/random-shaders/master/images/image-06.png) | ![](https://raw.githubusercontent.com/slightknack/random-shaders/master/images/image-07.png)
+![](https://raw.githubusercontent.com/slightknack/random-shaders/master/images/image-06.png) | ![](https://raw.githubusercontent.com/slightknack/random-shaders/master/images/image-08.png)
