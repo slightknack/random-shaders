@@ -6,7 +6,7 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
-#define DIVS 20.0
+#define DIVS 32.0
 
 // 2D Random
 float random (in vec2 st, float seed) {
@@ -54,12 +54,12 @@ float capsule(vec2 p, vec2 a, vec2 b, float r ) {
 }
 
 float in_line(vec2 noise, vec2 local, vec2 global) {
-    float line_width = length(noise - 0.5) * 0.2;
+    float line_width = length(noise - 0.5) * 0.4;
 
     float distance = capsule(
         local,
-        (global + 0.5),
-        (global + 0.5) + ((noise - 0.5) * 5.0 + 0.5) - 0.5,
+        (global + 0.5) + ((1.0 - noise - 0.5) * (5.0 - 0.4) + 0.5) - 0.5,
+        (global + 0.5) + ((noise - 0.5) * (5.0 - 0.4) + 0.5) - 0.5,
         line_width
     );
     
@@ -113,5 +113,8 @@ void main() {
     float distance = overlaps(fractional + 5.0 * vec2(sin(time), cos(time)) / DIVS, local, time);
     vec3 color = color_stretch(fractional, time);
 
+    // smoothstep(0.0, 0.05, distance)
+// vec3(thing > 0.0, thing_2 > 0.0, 0.5)
     gl_FragColor = vec4(vec3(distance) * color * 1.0, 1.0);
 }
+
