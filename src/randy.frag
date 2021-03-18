@@ -1,5 +1,20 @@
-// Author:
-// Title:
+// hello fellow chad randy
+// I am shader god isaac, at your service
+// this is a ground shader, modeled after you pixel art
+// I threw it togeth in a couple hours after watching your video today
+// It's not particularly optimized,
+// but it used a variety of techniques you may find useful.
+
+// copsta-and-pasta into:
+// http://editor.thebookofshaders.com/
+// to run.
+
+// There are a few things that can be improved,
+// but they mainly revolve around better paramaterization,
+// more consistent coordinate spaces,
+// and so on.
+
+// Title: The Ground
 
 #ifdef GL_ES
 precision mediump float;
@@ -9,10 +24,14 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
+// quick hack for random numbers
 vec2 random2( vec2 p ) {
     return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
 }
 
+// gridded voroni tiling
+// same thing you can find in the book of shaders
+// return: x is id, y is distance, z is angle
 vec3 voroni(in vec2 st, in float scale) {    
     // Tile the space
     vec2 i_st = floor(st / scale);
@@ -37,11 +56,12 @@ vec3 voroni(in vec2 st, in float scale) {
         }
     }
 
-    // Assign a color using the closest point position
+    // give each tile a random unique id between 0 and 1
     float id = random2(m_point).x;
     return vec3(id, m_dist, m_dot);
 }
 
+// converts a pixel into an aspect-ratio scaled point centered around the origin
 vec2 pixel_to_point(in vec2 pixel) {
     vec2 st = 2.0 * pixel/u_resolution.xy - 1.0;
     st.x *= u_resolution.x/u_resolution.y;
@@ -50,11 +70,14 @@ vec2 pixel_to_point(in vec2 pixel) {
 
 #define PIXEL_SIZE (1.0 / u_resolution.y)
 
+// rotation for lighting angles
 mat2 rotate2d(float _angle){
     return mat2(cos(_angle),-sin(_angle),
                 sin(_angle),cos(_angle));
 }
 
+// calculates the edges between cells by sampling vertically and horizontally, then checking the ids
+// return: x is edge, y is distance, z is angle
 vec3 edge(in vec2 pixel, in float thickness, float angle, float scale) {
     mat2 rotation = rotate2d(angle);
     vec2 u = pixel_to_point(pixel + vec2(0.0, -thickness) * rotation);
@@ -69,9 +92,12 @@ vec3 edge(in vec2 pixel, in float thickness, float angle, float scale) {
     return vec3(e, m_vo.y, m_vo.z);
 }
 
+// from memory lol
 #define PI 3.14159265358979323846264338327950288417
 
-// x is edge, y is lighting, z
+// a composition pass that samples the voroni noise at multiple places
+// to calculate some thicc edges to get nice lighting
+// r is edge, g is lighting, b is distance, z is angle
 vec4 lighting(in vec2 pixel, in float intensity, in float angle) {
     vec3 e = edge(pixel, 1.5, 0.0, 12.0);
     vec3 e3 = edge(pixel, intensity, angle, 12.0);
@@ -79,6 +105,7 @@ vec4 lighting(in vec2 pixel, in float intensity, in float angle) {
     return vec4(e.x, e3.x, e.y, e.z);
 }
 
+// we're just using a sine wave as the ground for now
 float ground(in vec2 point) {
     point *= vec2(7.0, 11.0);
     return sin(point.x) - point.y + 5.;
@@ -92,6 +119,9 @@ float sigmoid(in float x) {
 #define BROWN vec3(0.0)
 #define TOP   vec3(0.5, 0.3, 0.2)
 
+// number of color bands
+// this snaps it to 8.
+// I imagine you have your own pallete and so on
 #define STEPS 8.0
 #define STEP  1.0 / STEPS
 
@@ -116,6 +146,8 @@ float noise (in vec2 st) {
             (d - b) * u.x * u.y;
 }
 
+// fractional brownian motion
+
 #define OCTAVES 3
 float fbm (in vec2 st) {
     // Initial values
@@ -132,6 +164,8 @@ float fbm (in vec2 st) {
     return value;
 }
 
+// given a number between 0 and 1,
+// return the corresponding color in the pallete gradient
 vec3 color_curve(in float x) {
     x = min(max(x, 0.0), 1.0);
     x = floor(x * STEPS) / STEPS;
@@ -157,9 +191,12 @@ void main() {
     // the rock fill
     tone += 5.0 * STEP * dirt.g * (1.0 - dirt.r);
         
-    // calculate ground:
+    // calculate ground depth:
     float depth = ground(point);
     
+    // return early if sky
+    // this is a checker pattern
+    // but you could set it to transparent or something for compositing
     if (depth < 0.0) {
         vec2 unpixel = gl_FragCoord.xy;
         float checker = ceil(sin(unpixel.x * 0.1) * sin(unpixel.y * 0.1)) * 0.2 + 0.4;
@@ -167,6 +204,7 @@ void main() {
         return;
     }
     
+    // calculate how deeply we can peer into the ground
     float visible = (1.0 - depth * 0.2);
     
     // noise to counteract limited pallete banding
@@ -176,5 +214,6 @@ void main() {
     vec3 color = color_curve(tone + 3.0 * STEP * visible + noise * STEP * 2.0);
     // vec3 color = vec3(visible);
     
+    // tada!
     gl_FragColor = vec4(color,1.0);
 }
