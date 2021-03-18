@@ -1,9 +1,9 @@
 // hello fellow chad randy
 // I am shader god isaac, at your service
 // this is a ground shader, modeled after you pixel art
-// I threw it togeth in a couple hours after watching your video today
+// I threw it together in a couple hours after watching your video today
 // It's not particularly optimized,
-// but it used a variety of techniques you may find useful.
+// but it uses a variety of techniques you may find useful.
 
 // copsta-and-pasta into:
 // http://editor.thebookofshaders.com/
